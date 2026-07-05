@@ -40,8 +40,8 @@ Data（数据）：prompts/ outputs/ uploads/
 1. **模块间通过"文件"交接，不直接传递内存数据**。任何新功能（网页读取、竞品搜索、Wordstat接入等）应新建模块，读写固定命名的文件，**不修改已跑通的旧模块内部逻辑**。
 2. **人工介入环节用文件名/版本号标记状态**，不额外开发状态跟踪系统。例如：
    - AI生成 `keyword_v1.md`
-   - 人工审核删减后另存为 `keyword_v2.md`
-   - 下一步模块读取 `keyword_v2.md`；若文件不存在，代码应报错提示"请先完成人工审核"
+   - 人工审核删减后另存为 `keyword_v1_reviewed.md`
+   - 下一步模块读取 `keyword_v1_reviewed.md`；若文件不存在，代码应报错提示"请先完成人工审核"
 3. **Prompt变量替换使用 `{{key}}` 占位符**（`ai_task_runner.py`里实现），避免和Python字符串格式化语法冲突。
 4. **模型选择通过 `.env` 控制**，业务代码通过 `use_premium=True/False` 切换，不硬编码模型名：
    - `OPENROUTER_CHEAP_MODEL`（如 deepseek-v4-pro）
@@ -66,9 +66,11 @@ SEM自动化/
 │   ├── doc_reader.py / excel_reader.py / pdf_reader.py / image_reader.py
 │   ├── file_reader.py        # 统一入口，分发给上面几个reader
 │   └── web_reader.py         # 已建文件，网页读取功能待开发
+│   └── negative_keyword_analyzer.py  # 业务层：否词生成
 ├── prompts/
 │   ├── project_brief.md
 │   ├── keyword_extract.md
+│   ├── negative_keyword.md
 │   └── ad_copy.md            # 已建文件，内容/调用待开发
 ├── outputs/{project_name}/   # 每个项目独立输出目录
 ├── uploads/
@@ -84,10 +86,10 @@ SEM自动化/
 | file_reader | `read_file()` | `uploads/*.pdf/docx/xlsx` | `outputs/{project}/raw_text.txt` | ✅ 已跑通 |
 | ai_analyzer | `analyze_project_brief()` | `raw_text.txt` | `outputs/{project}/project_brief.md` | ✅ 已跑通 |
 | keyword_analyzer | `generate_keyword_v1()` | `raw_text.txt` + `project_brief.md` | `outputs/{project}/keyword_v1.md` | ✅ 已跑通 |
-| （人工审核） | 人工打开 `keyword_v1.md` 删减确认 | `keyword_v1.md` | `keyword_v2.md`（人工另存） | 🔲 流程约定，无需代码 |
-| negative_keyword_analyzer | 待建 | `raw_text.txt` + `project_brief.md`（或`keyword_v2.md`） | `negative_keywords.md` | 🔲 下一步要做 |
+| （人工审核） | 人工打开 `keyword_v1.md` 删减确认 | `keyword_v1.md` | `keyword_v1_reviewed.md`（或`wordstat_query_list`人工另存） | 🔲 流程约定，无需代码 |
+| negative_keyword_analyzer | ✅ 已跑通 | `raw_text.txt` + `project_brief.md` + `keyword_v1.md`  | `negative_keywords.md` | 🔲 下一步要做 |
 | ad_copy_analyzer | 待建 | `raw_text.txt` + `project_brief.md` | `ad_copy.md` | 🔲 下一步要做 |
-| wordstat数据合并 | 待建 | `keyword_v2.md` + 人工整理的Wordstat搜索量（Excel/表格） | 最终关键词Excel表（含否词sheet） | 🔲 先做半人工版本 |
+| wordstat数据合并 | 待建 | `wordstat_query_list` + 人工整理的Wordstat搜索量（Excel/表格） | 最终关键词Excel表（含否词sheet） | 🔲 先做半人工版本 |
 
 ---
 
@@ -113,7 +115,7 @@ run_ai_task(project_name, prompt_name, output_filename, replacements,
 → 返回 str（AI生成正文）
 ```
 
-新业务模块（如`negative_keyword_analyzer.py`）只需模仿`keyword_analyzer.py`的写法：读输入文件 → 校验非空 → 截断 → 调`run_ai_task`即可，无需关心底层AI调用细节。
+新业务模块（如`ad_copy_analyzer.py`）只需模仿`keyword_analyzer.py`的写法：读输入文件 → 校验非空 → 截断 → 调`run_ai_task`即可，无需关心底层AI调用细节。
 
 ---
 
@@ -123,11 +125,11 @@ run_ai_task(project_name, prompt_name, output_filename, replacements,
 - 本地文件读取（pdf/docx/excel）→ raw_text.txt
 - AI项目简报分析 → project_brief.md
 - 关键词v1生成 → keyword_v1.md
+- 否词清单模块（`negative_keyword_analyzer.py`）
 
 **下一步计划（按优先级）：**
-1. 否词清单模块（`negative_keyword_analyzer.py`）
-2. 广告文案模块（`ad_copy_analyzer.py`）
-3. Wordstat数据"半人工"合并脚本（人工查数据，脚本合并成Excel）
+1. 广告文案模块（`ad_copy_analyzer.py`）
+2. Wordstat数据"半人工"合并脚本（人工查数据，脚本合并成Excel）
 
 **暂不做（留待后期迭代）：**
 - 网页读取（客户网站/竞品网站自动抓取）
