@@ -148,7 +148,8 @@ def call_openrouter(
         "model": model,
         "messages": messages,
         "temperature": temperature,
-        "max_tokens": max_tokens
+        "max_tokens": max_tokens,
+        "stream": False
     }
 
     print("正在调用 AI...")
@@ -172,8 +173,26 @@ def call_openrouter(
 
     data = response.json()
 
-     # 1. 提取内容
-    content = data["choices"][0]["message"]["content"]
+    # 提取模型返回消息
+    choice = data["choices"][0]
+    message = choice["message"]
+
+    content = message.get("content")
+    reasoning = message.get("reasoning")
+    finish_reason = choice.get("finish_reason")
+
+    # 如果模型没有生成最终正文，给出容易理解的错误
+    if not content:
+        usage = data.get("usage", {})
+
+        raise RuntimeError(
+            "模型请求成功，但没有返回最终正文。\n"
+            f"模型：{data.get('model')}\n"
+            f"结束原因：{finish_reason}\n"
+            f"是否返回推理内容：{bool(reasoning)}\n"
+            f"Token 用量：{usage}\n"
+            "如果结束原因是 length，通常表示 MAX_TOKENS 太小。"
+        )
     
     # 2. 提取用量信息 (防止某些接口不返回 usage 导致报错，加个 get 或 try)
     usage = data.get("usage", {})
@@ -188,7 +207,7 @@ def call_openrouter(
         "actual_model": data.get("model"),
         "content": content,
         "usage": usage,
-        "finish_reason": data["choices"][0].get("finish_reason"),
+        "finish_reason": finish_reason,
         "raw": data
     }
 
