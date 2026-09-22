@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "name": "中山市凌宇机械",
+  "slug": "lingyu",
+  "direct_config": "../lingyu_direct_monthly.json",
+  "metrika_config": "../lingyu_metrika_monthly.json",
+  "layout": "../templates/yandex_standard.json",
+  "template": "../../templates/lingyu_reference.xlsx",
+  "template_client_login": "zhongshanshilingyujixie",
+  "negative_words": "preserve"
+}

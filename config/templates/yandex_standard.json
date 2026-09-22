@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "presentation": "classic",
+  "classic": {
+    "summary_order": ["AvgDailyCost","Impressions","Clicks","Ctr","Cost","AvgCpc","AvgPageviews","ConversionRate","CostPerConversion","Conversions"],
+    "metrika_cards": ["ym:pv:pageviews","ym:s:users","ym:s:visits","ym:s:avgVisitDurationSeconds","ym:s:pageDepth","ym:s:bounceRate"]
+  },
+  "report_sheet": "yandex报告",
+  "search_sheet": "搜索词",
+  "negative_sheet": "否词",
+  "search_sheet_pattern": "^(?:[0-9]+月)?搜索词$",
+  "title": "Yandex 数据报告",
+  "style": {
+    "font": "Microsoft YaHei", "title_fill": "#DCE6F1", "text": "#253047",
+    "colors": ["#7945E8", "#FF2B9A", "#10B8A0", "#3488FF", "#FFB84D", "#8E99AB"],
+    "row_height": 23, "column_width": 16, "chart_rows": 15
+  },
+  "direct_metrics": [
+    {"field":"Impressions","label":"展示次数","format":"#,##0"},
+    {"field":"Clicks","label":"点击次数","format":"#,##0"},
+    {"field":"Ctr","label":"CTR (%)","format":"0.00"},
+    {"field":"Cost","label":"花费 ({currency})","format":"#,##0.00"},
+    {"field":"AvgCpc","label":"CPC ({currency})","format":"0.00"},
+    {"field":"AvgDailyCost","label":"日均花费 ({currency})","format":"0.00"},
+    {"field":"AvgPageviews","label":"浏览深度","format":"0.00"},
+    {"field":"ConversionRate","label":"转化率 (%)","format":"0.00"},
+    {"field":"CostPerConversion","label":"CPA ({currency})","format":"0.00"},
+    {"field":"Conversions","label":"转化次数","format":"0.00"}
+  ],
+  "metrika_metrics": [
+    {"field":"ym:pv:pageviews","label":"页面浏览量（事件）","format":"#,##0"},
+    {"field":"ym:s:pageviews","label":"页面浏览量（会话）","format":"#,##0"},
+    {"field":"ym:s:users","label":"访客数","format":"#,##0"},
+    {"field":"ym:s:visits","label":"会话数","format":"#,##0"},
+    {"field":"ym:s:avgVisitDurationSeconds","label":"平均访问时长（秒）","format":"0.00"},
+    {"field":"ym:s:pageDepth","label":"浏览深度","format":"0.00"},
+    {"field":"ym:s:bounceRate","label":"跳出率 (%)","format":"0.00","change":"points"}
+  ],
+  "charts": {
+    "direct_daily": {"type":"line","fields":["Clicks","Cost","Conversions"]},
+    "traffic": {"type":"bar","fields":["ym:s:visits","ym:s:users","ym:s:pageviews"]},
+    "devices": {"type":"doughnut"},
+    "ages": {"type":"doughnut","exclude_unknown":true},
+    "sources": {"type":"doughnut"},
+    "new_returning": {"type":"line"},
+    "goals": {"type":"line","include_zero":true}
+  }
+}

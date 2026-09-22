@@ -1,0 +1,47 @@
+{
+  "client": "yutong",
+  "reportMonth": "2026-08",
+  "exchangeRateCnyPerUsd": 7.3,
+  "leadComparisonTotals": {
+    "current": 86,
+    "priorMonth": 80,
+    "priorYear": 93
+  },
+  "paths": {
+    "searchNetworkCurrent": "D:\\Elena\\9. 宇通客车\\2026.8 宇通8月月报\\宇通 8月 原始数据\\宇通 8月 搜索网盟.xlsx",
+    "searchNetworkPriorMonth": "D:\\Elena\\9. 宇通客车\\2026.8 宇通8月月报\\宇通 8月 原始数据\\宇通 26.7月 搜索网盟.xlsx",
+    "searchNetworkPriorYear": "D:\\Elena\\9. 宇通客车\\2026.8 宇通8月月报\\宇通 8月 原始数据\\宇通 25.8月搜索网盟.xlsx",
+    "leadSource": "D:\\Elena\\9. 宇通客车\\2026.8 宇通8月月报\\宇通 8月 原始数据\\宇通 8月 线索.xlsx",
+    "countrySource": "D:\\Elena\\9. 宇通客车\\2026.8 宇通8月月报\\宇通 8月 原始数据\\宇通 8月 国家数据.xlsx",
+    "monthlyWorkbook": "../../../templates/yutong/monthly.xlsx",
+    "countryHistory": "D:\\Elena\\9. 宇通客车\\同环比计算所需数据表\\2025.4-2026.7_国家数据汇总_整理版.xlsx",
+    "ytdHistory": "D:\\Elena\\9. 宇通客车\\同环比计算所需数据表\\2026年 线索+消耗ytd统计表_整理.xlsx"
+  },
+  "leadFilters": {
+    "regions": [
+      "海外中亚区",
+      "海外独联体区",
+      "海外机场摆渡车销售分公司",
+      "海外商用车销售分公司"
+    ],
+    "countries": [
+      "哈萨克斯坦",
+      "俄罗斯联邦",
+      "乌兹别克斯坦",
+      "土库曼斯坦",
+      "格鲁吉亚",
+      "白俄罗斯",
+      "吉尔吉斯斯坦",
+      "塔吉克斯坦",
+      "亚美尼亚",
+      "阿塞拜疆",
+      "摩尔多瓦"
+    ],
+    "mediaMustBeBlank": true
+  },
+  "sources": {
+    "exchangeRate": "原八月配置：7.3 CNY/USD；仅适用于该已验收周期，换月需确认。",
+    "leadComparisonTotals": "原八月配置：2026-08=86，2026-07=80，2025-08=93；八月会与线索筛选重新核对。"
+  },
+  "directLogin": "yutongkeche2024"
+}

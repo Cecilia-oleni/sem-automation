@@ -1,0 +1,16 @@
+{
+  "client_name": "中山市凌宇机械",
+  "client_login": "zhongshanshilingyujixie",
+  "client_slug": "lingyu",
+  "currency": "USD",
+  "attribution_model": null,
+  "include_vat": "NO",
+  "include_discount": "NO",
+  "goal_id": null,
+  "conversion_label": "Direct All goals",
+  "tolerance": {
+    "count_absolute": 2,
+    "cost_absolute": 1.0,
+    "relative": 0.005
+  }
+}

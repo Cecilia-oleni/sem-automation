@@ -1,0 +1,62 @@
+{
+  "client_name": "Angel Yeast 安琪酵母",
+  "client_login": "porg-wlmv2jij",
+  "attribution_model": "AUTO",
+  "exchange_rate_usd_cny": 7.3,
+  "include_vat": "NO",
+  "include_discount": "NO",
+  "goals": [
+    {"id": "438461092", "name": "电话点击"},
+    {"id": "438463889", "name": "messenger点击（telegram）"},
+    {"id": "438459120", "name": "销售邮箱点击 sales@angelyeast.ru"},
+    {"id": "438470990", "name": "social network点击（vk, X, OK/mailru）"},
+    {"id": "438459427", "name": "采购邮箱点击 purch@angelyeast.ru"},
+    {"id": "438459746", "name": "物流邮箱点击 il@angelyeast.ru"},
+    {"id": "438484432", "name": "officemsk@angelyeast.ru"},
+    {"id": "439473870", "name": "Auto-goal: Sent contact details"}
+  ],
+  "category_rules": [
+    {"category": "brand", "patterns": ["brand"]},
+    {"category": "Biotechnology Yeast", "patterns": ["biotechnology"]},
+    {"category": "Animal Nutrition", "patterns": ["animal nutrition"]},
+    {"category": "Raising Agent", "patterns": ["raising agent"]},
+    {"category": "Baking Yeast", "patterns": ["baking"]},
+    {"category": "Brewing Yeast", "patterns": ["brewing"]},
+    {"category": "YE", "patterns": ["s-ye", "y-ru-ye", "y-cis-ye", "ye-product", "ye-b/c"]}
+  ],
+  "exhibition_patterns": ["exhibition", "expo", "выстав", "展会"],
+  "known_countries": [
+    "Russia", "Kazakhstan", "Belarus", "Uzbekistan", "Moldova", "Armenia",
+    "Tajikistan", "Kyrgyzstan", "Azerbaijan", "Turkmenistan", "Abkhazia",
+    "South Ossetia"
+  ],
+  "geo_country_root_overrides": {
+    "977": "Russia",
+    "959": "Russia"
+  },
+  "july_ppt_geo_baseline": [
+    {"Country": "Russia", "Impressions": 355881, "Clicks": 2126, "Cost": 1874.20, "ConversionsTotal": 47},
+    {"Country": "Kazakhstan", "Impressions": 206655, "Clicks": 171, "Cost": 89.23, "ConversionsTotal": 7},
+    {"Country": "Belarus", "Impressions": 79701, "Clicks": 190, "Cost": 84.36, "ConversionsTotal": 2},
+    {"Country": "Uzbekistan", "Impressions": 262643, "Clicks": 432, "Cost": 72.44, "ConversionsTotal": 2},
+    {"Country": "Moldova", "Impressions": 424070, "Clicks": 467, "Cost": 62.07, "ConversionsTotal": 2},
+    {"Country": "Armenia", "Impressions": 204077, "Clicks": 187, "Cost": 40.35, "ConversionsTotal": 2},
+    {"Country": "Tajikistan", "Impressions": 127553, "Clicks": 159, "Cost": 28.93, "ConversionsTotal": 3},
+    {"Country": "Kyrgyzstan", "Impressions": 129024, "Clicks": 134, "Cost": 26.88, "ConversionsTotal": 3},
+    {"Country": "Azerbaijan", "Impressions": 93527, "Clicks": 105, "Cost": 18.15, "ConversionsTotal": 2},
+    {"Country": "Turkmenistan", "Impressions": 36847, "Clicks": 65, "Cost": 12.00, "ConversionsTotal": 0},
+    {"Country": "Abkhazia", "Impressions": 10803, "Clicks": 13, "Cost": 4.99, "ConversionsTotal": 0},
+    {"Country": "South Ossetia", "Impressions": 3670, "Clicks": 2, "Cost": 0.22, "ConversionsTotal": 0},
+    {"Country": "Others", "Impressions": 59022, "Clicks": 75, "Cost": 18.51, "ConversionsTotal": 0}
+  ],
+  "keyword_translations": {
+    "заводы кормовых дрожжей в россии": "俄罗斯的饲料酵母工厂",
+    "дрожжи кормовые производитель": "饲料酵母生产商",
+    "производители кормовых дрожжей в казахстане": "哈萨克斯坦的饲料酵母生产商",
+    "экстракт дрожжей": "酵母提取物",
+    "купить алкогольные дрожжи": "购买酿酒酵母",
+    "дрожжи angel": "Angel酵母",
+    "дрожжи хлебопекарные прессованные": "压缩烘焙酵母",
+    "дрожжи активные купить": "购买活性酵母"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "client_name": "中山市凌宇机械",
+  "client_slug": "lingyu",
+  "counter_id": 97509581,
+  "expected_site": "ru.lingyuair.com",
+  "attribution": "lastsign",
+  "filters": "",
+  "accuracy": "full",
+  "goal_ids": ["334172745", "334172853", "334172998", "334173114", "334174433", "334174453", "334419877", "335548090", "348488206"],
+  "notes": [
+    "counter_id=97509581 已由用户确认；不使用同域名另一个计数器 105091790。",
+    "模板含自然搜索、广告、直接访问等来源，按全站流量拉取，不限定 Direct 流量。",
+    "流量来源使用 API 默认 lastsign；7 月四个来源的会话数与截图一致。",
+    "模板顶部 Pageviews=228 对应页面事件 ym:pv:pageviews，图表 Pageviews=206 对应会话指标 ym:s:pageviews，均已核对。"
+  ]
+}

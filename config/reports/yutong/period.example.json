@@ -1,0 +1,47 @@
+{
+  "client": "yutong",
+  "reportMonth": "YYYY-MM",
+  "exchangeRateCnyPerUsd": null,
+  "leadComparisonTotals": {
+    "current": null,
+    "priorMonth": null,
+    "priorYear": null
+  },
+  "paths": {
+    "searchNetworkCurrent": "填写该期间文件的绝对路径.xlsx",
+    "searchNetworkPriorMonth": "填写该期间文件的绝对路径.xlsx",
+    "searchNetworkPriorYear": "填写该期间文件的绝对路径.xlsx",
+    "leadSource": "填写该期间文件的绝对路径.xlsx",
+    "countrySource": "填写该期间文件的绝对路径.xlsx",
+    "monthlyWorkbook": "../../../templates/yutong/monthly.xlsx",
+    "countryHistory": "D:\\Elena\\9. 宇通客车\\同环比计算所需数据表\\2025.4-2026.7_国家数据汇总_整理版.xlsx",
+    "ytdHistory": "D:\\Elena\\9. 宇通客车\\同环比计算所需数据表\\2026年 线索+消耗ytd统计表_整理.xlsx"
+  },
+  "leadFilters": {
+    "regions": [
+      "海外中亚区",
+      "海外独联体区",
+      "海外机场摆渡车销售分公司",
+      "海外商用车销售分公司"
+    ],
+    "countries": [
+      "哈萨克斯坦",
+      "俄罗斯联邦",
+      "乌兹别克斯坦",
+      "土库曼斯坦",
+      "格鲁吉亚",
+      "白俄罗斯",
+      "吉尔吉斯斯坦",
+      "塔吉克斯坦",
+      "亚美尼亚",
+      "阿塞拜疆",
+      "摩尔多瓦"
+    ],
+    "mediaMustBeBlank": true
+  },
+  "sources": {
+    "exchangeRate": "填写本期汇率依据",
+    "leadComparisonTotals": "填写本期、上月、去年同月核对总数的来源"
+  },
+  "directLogin": "yutongkeche2024"
+}

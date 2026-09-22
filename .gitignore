@@ -20,3 +20,16 @@ cache/
 
 # OS 文件
 .DS_Store
+
+# 本机报告运行环境
+config/runtime.local.json
+node_modules/
+
+experiments/wordstat/results/
+experiments/wordstat/batch-*/
+experiments/wordstat/excel-delivery-*/
+experiments/yutong_monthly/sandbox/
+
+# 历史实验与迁移现场（本地留存）
+experiments/archive/
+experiments/legacy/
