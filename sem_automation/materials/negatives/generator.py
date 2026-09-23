@@ -1,5 +1,5 @@
 # 模块：sem_automation/materials/negatives/generator.py；内部模块由统一入口调用。
-# VS Code PowerShell 先输入：Set-Location -LiteralPath 'D:\sem自动化 - 副本'
+# VS Code PowerShell 先输入：Set-Location -LiteralPath 'D:\sem自动化'
 # 终端输入（复制时去掉注释符）：& '.\.venv\Scripts\python.exe' -X utf8 '.\sem.py' materials run --project '通亚' --dry-run
 # 上述为离线预览；生成物料时去掉 --dry-run，按提示完成人工节点。
 from sem_automation.core.paths import material_dir
@@ -16,8 +16,8 @@ from sem_automation.materials.ads.generator import group_keywords, load_keyword_
 from sem_automation.core.text_utils import get_env_int, limit_text
 
 
-def format_keyword_v2_for_prompt(project_name, project_root=None):
-    keyword_df = load_keyword_v2(project_name, project_root)
+def format_keyword_v2_for_prompt(project_name, project_root=None, keyword_file=None):
+    keyword_df = load_keyword_v2(project_name, project_root, keyword_file)
     groups = group_keywords(keyword_df)
 
     lines = [
@@ -41,13 +41,13 @@ def load_keyword_reference(project_name, output_dir, keyword_version, project_ro
     keyword_stem = Path(keyword_version).stem
     keyword_suffix = Path(keyword_version).suffix.lower()
 
-    if keyword_suffix == ".xlsx":
+    if keyword_suffix in (".xlsx", ".csv"):
         if keyword_stem not in ["keyword_v2", "keywords_v2"]:
             keyword_path = output_dir / keyword_version
             if not keyword_path.exists():
                 raise FileNotFoundError(f"找不到关键词 Excel 文件：{keyword_path}")
 
-        return format_keyword_v2_for_prompt(project_name, project_root), keyword_version
+        return format_keyword_v2_for_prompt(project_name, project_root, output_dir / keyword_version), keyword_version
 
     if keyword_suffix == ".md":
         keyword_path = output_dir / keyword_version
@@ -68,10 +68,7 @@ def load_keyword_reference(project_name, output_dir, keyword_version, project_ro
                     raise
             else:
                 keyword_path = output_dir / "keyword_v1.md"
-        except ValueError:
-            if keyword_version != "auto":
-                raise
-            keyword_path = output_dir / "keyword_v1.md"
+
     else:
         keyword_path = output_dir / f"{keyword_version}.md"
 

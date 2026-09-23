@@ -1,7 +1,7 @@
 from pathlib import Path
 
 # 运行时直接在终端输入：
-# & "D:\sem自动化 - 副本\sem自动化 - 副本\.venv\Scripts\python.exe" -m modules.negative_keyword_analyzer
+# & "D:\sem自动化\sem自动化 - 副本\.venv\Scripts\python.exe" -m modules.negative_keyword_analyzer
 # 不要使用右上角的播放按钮来启动代码，因为会找不到 modules 包
 
 from modules.ai_task_runner import run_ai_task

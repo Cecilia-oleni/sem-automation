@@ -1,4 +1,6 @@
-# Wordstat 独立实验
+# Wordstat 独立实验（历史）
+
+正式工作流已接入，请使用根目录 `sem.py materials wordstat`；操作与技术说明见 [Wordstat 技术说明](../../docs/Wordstat技术说明.md)。以下为原实验行为和记录，固定14次上限不适用于正式客户端。
 
 人工查看与筛选：`keywords.txt` 保存已查询的 14 个词、搜索量、返回状态、采用与人工备注列；`expanded_keywords.txt` 保存全部热门词与关联词、搜索量及来源。制表符分列，可直接复制到表格。采用列可填写“是/否”，当前不自动影响报告，便于人工挑选后粘贴。脚本只读取 keywords.txt 第一列，跳过 # 开头的说明行。
 
@@ -8,7 +10,7 @@ JSON 是原始数据凭据，报告从中读取。`export_review.py` 只做首�
 
 只读 `../../.env` 的 `YANDEX_CLOUD_AI_STUDIO_API_KEY` 与 `YANDEX_CLOUD_FOLDER_ID`。不读取旧 OAuth token，不复制 key。不要提交 .env 或 results。
 
-从唯一项目根目录 `D:\sem自动化 - 副本` 执行：
+从唯一项目根目录 `D:\sem自动化` 执行：
 
 ```powershell
 .\.venv\Scripts\python.exe .\experiments\wordstat\wordstat.py --phrase 'трансплантация костного мозга'
@@ -24,4 +26,4 @@ results 中保留请求、时间、原始响应与调用记录。空对象响应
 .\.venv\Scripts\python.exe .\experiments\wordstat\make_report.py
 ```
 
-历史结果见 REPORT.md。该实验尚未自动接入正式物料工作流，人工 Wordstat 节点保持原样。
+历史结果见 REPORT.md。正式物料工作流使用独立客户端；此实验目录保留历史，不作为正式入口。

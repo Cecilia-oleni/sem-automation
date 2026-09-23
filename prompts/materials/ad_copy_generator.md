@@ -1,5 +1,5 @@
 # PowerShell 运行：
-# & "D:\sem自动化 - 副本\sem自动化 - 副本\.venv\Scripts\python.exe" -m modules.ad_copy_generator
+# & "D:\sem自动化\sem自动化 - 副本\.venv\Scripts\python.exe" -m modules.ad_copy_generator
 
 from pathlib import Path
 import argparse

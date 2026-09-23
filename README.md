@@ -1,5 +1,6 @@
 # SEM 工作流
 
+
 ## 版本区分
 
 此分支是 **Codex 重构版**，于 2026-09-22 单独保存，与原版并行保留。
@@ -24,15 +25,17 @@
 | 整体流程、文件交接、单独运行、去哪里取结果 | [工作流操作指南](docs/工作流操作指南.md) |
 | 月报换月、联网采集、离线复用、宇通历史表同步 | [月报操作说明](docs/月报操作说明.md) |
 | 后续改代码或扩展功能 | [架构与后续扩展](docs/架构与后续扩展.md) |
+| Wordstat 参数、缓存、限流续跑、筛选算法 | [Wordstat 技术说明](docs/Wordstat技术说明.md) |
+| 本次 Wordstat 接入验证了什么 | [Wordstat 接入验收记录](docs/Wordstat接入验收记录.md) |
 | 具体函数接口、详细交接约定 | [模块接口与交接清单](<experiments/archive/项目日志/模块接口清单(pipeline_v1).md>) |
 | 之前重构验证了什么 | [改造验收记录](docs/改造验收记录.md) |
 
 ## 打开项目
 
-唯一项目目录：`D:\sem自动化 - 副本`。在 VS Code 中打开此目录，选择“终端 → 新建终端”（PowerShell）。不需要进入第二层同名目录，也不需要先激活虚拟环境。
+唯一项目目录：`D:\sem自动化`。在 VS Code 中打开此目录，选择“终端 → 新建终端”（PowerShell）。不需要进入第二层同名目录，也不需要先激活虚拟环境。
 
 ```powershell
-Set-Location -LiteralPath 'D:\sem自动化 - 副本'
+Set-Location -LiteralPath 'D:\sem自动化'
 & '.\.venv\Scripts\python.exe' -X utf8 '.\sem.py' --help
 ```
 
@@ -45,7 +48,9 @@ Set-Location -LiteralPath 'D:\sem自动化 - 副本'
 & '.\.venv\Scripts\python.exe' -X utf8 '.\sem.py' materials run --project '通亚'
 ```
 
-`--dry-run` 不联网、不写文件。正式运行保留已有结果处理、人工断点和网站分支；补齐人工文件后运行同一命令续跑。
+`--dry-run` 不联网、不写文件。正式运行保留已有结果处理、人工断点和网站分支。Wordstat 已自动接入：审核种子 Excel/CSV → 全量查询与限流续跑 → AI 筛选分组翻译 → 人工最终审核 → 否词和广告语。默认全部地区，每种子最多30个扩展候选，最终最多600词。补齐人工文件后运行同一命令续跑。
+
+操作步骤见 [工作流操作指南](docs/工作流操作指南.md)，独立查询、地区配置、缓存与筛选规则见 [Wordstat 技术说明](docs/Wordstat技术说明.md)。
 
 宇通八月 Yandex 月报（本地数据）：
 
@@ -87,10 +92,10 @@ outputs/reports/<客户>/<报告类型>/<月份>/runs/<运行编号>/
 |---|---|
 | `sem_automation/materials/` | 物料业务与人工断点 |
 | `sem_automation/reporting/` | 三类报告及各自 Excel 渲染 |
-| `sem_automation/integrations/yandex/` | Direct / Metrika 客户端；安琪适配器独立 |
+| `sem_automation/integrations/yandex/` | Direct / Metrika / Wordstat 客户端；安琪适配器独立 |
 | `sem_automation/ai/`、`readers/`、`core/` | 模型、读取、路径和运行记录 |
 | `config/`、`prompts/`、`templates/` | 配置、提示词和模板 |
-| `experiments/wordstat/` | 尚未接入正式流程的 Wordstat 实验 |
+| `experiments/wordstat/` | 旧 Wordstat 实验与缓存；正式流程不导入 |
 | `experiments/archive/` | 旧脚本、记录和迁移工具，不参与日常运行 |
 | `outputs/_archive/` | 旧报告、原始 JSON 和回归参照 |
 | `outputs/_migration/` | 改造前代码快照、Git 状态、迁移和验收记录 |

@@ -1,5 +1,5 @@
 # 模块：sem_automation/materials/keywords/draft.py；内部模块由统一入口调用。
-# VS Code PowerShell 先输入：Set-Location -LiteralPath 'D:\sem自动化 - 副本'
+# VS Code PowerShell 先输入：Set-Location -LiteralPath 'D:\sem自动化'
 # 终端输入（复制时去掉注释符）：& '.\.venv\Scripts\python.exe' -X utf8 '.\sem.py' materials run --project '通亚' --dry-run
 # 上述为离线预览；生成物料时去掉 --dry-run，按提示完成人工节点。
 from sem_automation.core.paths import material_dir
@@ -66,7 +66,7 @@ def generate_keyword_v1(project_name, provider=None, model=None, use_premium=Non
         notice=f"【提示：原始资料较长，本次关键词生成按资料来源分配后最多参考 {max_chars} 个字符，并结合 project_brief.md。后续可通过分块分析功能处理完整资料。】"
     )
 
-    return run_ai_task(
+    result = run_ai_task(
         project_name=project_name,
         output_dir=output_dir,
         prompt_name="materials/keyword_extract",
@@ -79,6 +79,9 @@ def generate_keyword_v1(project_name, provider=None, model=None, use_premium=Non
         model=model,
         use_premium=use_premium
     )
+    from sem_automation.materials.keywords.tables import prepare_review
+    prepare_review(output_dir, root=project_root, force=True)
+    return result
 
 
 if __name__ == "__main__":

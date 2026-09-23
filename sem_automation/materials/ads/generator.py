@@ -1,5 +1,5 @@
 # 模块：sem_automation/materials/ads/generator.py；内部模块由统一入口调用。
-# VS Code PowerShell 先输入：Set-Location -LiteralPath 'D:\sem自动化 - 副本'
+# VS Code PowerShell 先输入：Set-Location -LiteralPath 'D:\sem自动化'
 # 终端输入（复制时去掉注释符）：& '.\.venv\Scripts\python.exe' -X utf8 '.\sem.py' materials run --project '通亚' --dry-run
 # 上述为离线预览；生成物料时去掉 --dry-run，按提示完成人工节点。
 from sem_automation.core.paths import material_dir
@@ -146,57 +146,10 @@ def parse_manual_keyword_v2(path):
 
     return pd.DataFrame(rows)
 
-def load_keyword_v2(project_name, project_root=None):
-    output_dir = get_output_dir(project_name, project_root)
-    path = first_existing_path([
-        output_dir / "keyword_v2.xlsx",
-        output_dir / "keywords_v2.xlsx",
-    ])
+def load_keyword_v2(project_name, project_root=None, keyword_file=None):
+    from sem_automation.materials.keywords.tables import load_final
+    return load_final(get_output_dir(project_name, project_root), keyword_file)
 
-    if not path.exists():
-        raise FileNotFoundError(
-            f"找不到关键词文件 keyword_v2.xlsx 或 keywords_v2.xlsx：{path}"
-        )
-
-    df = pd.read_excel(path)
-
-    column_config = {
-        "Campaign": ["Campaign", "广告系列", "广告系列名称"],
-        "AdGroup": ["AdGroup", "Ad Group", "广告组", "广告组名称"],
-        "Keyword": ["Keyword", "关键词", "关键词（俄语/英文）", "关键词(俄语/英文)", "KeywordText"],
-    }
-
-    rename_map = {}
-
-    for standard_name, aliases in column_config.items():
-        actual_column = find_column(df, aliases)
-
-        if actual_column is None:
-            df = parse_manual_keyword_v2(path)
-            rename_map = {}
-            break
-
-        rename_map[actual_column] = standard_name
-
-    if rename_map:
-        df = df.rename(columns=rename_map)
-
-    df = df[["Campaign", "AdGroup", "Keyword"]].copy()
-    df = df.dropna(subset=["Campaign", "AdGroup", "Keyword"])
-
-    for col in ["Campaign", "AdGroup", "Keyword"]:
-        df[col] = df[col].astype(str).str.strip()
-
-    df = df[
-        (df["Campaign"] != "")
-        & (df["AdGroup"] != "")
-        & (df["Keyword"] != "")
-    ]
-
-    if df.empty:
-        raise ValueError("keyword_v2.xlsx 中没有可用关键词数据。")
-
-    return df
 
 def group_keywords(df):
     groups = []
@@ -331,12 +284,13 @@ def generate_ad_copy(
     max_tokens=None,
     use_premium=None,
     project_root=None,
+    keyword_file=None,
 ):
     output_dir = get_output_dir(project_name, project_root)
 
     project_brief = load_project_brief(project_name, project_root)
     negative_keywords = load_negative_keywords(project_name, project_root)
-    keyword_df = load_keyword_v2(project_name, project_root)
+    keyword_df = load_keyword_v2(project_name, project_root, keyword_file)
 
     groups = group_keywords(keyword_df)
 
@@ -407,6 +361,7 @@ def main():
     )
 
     parser.add_argument("--project", help="项目名称")
+    parser.add_argument("--keywords-file", help="明确指定最终审核的 Excel/CSV")
     parser.add_argument("--model", help="指定模型名称")
     parser.add_argument("--temperature", type=float, default=0.7)
     parser.add_argument("--max-tokens", type=int)
@@ -422,6 +377,7 @@ def main():
         temperature=args.temperature,
         max_tokens=args.max_tokens,
         use_premium=args.use_premium,
+        keyword_file=args.keywords_file,
     )
 
 if __name__ == "__main__":

@@ -1,5 +1,5 @@
 # 模块：sem_automation/materials/pipeline.py；内部模块由统一入口调用。
-# VS Code PowerShell 先输入：Set-Location -LiteralPath 'D:\sem自动化 - 副本'
+# VS Code PowerShell 先输入：Set-Location -LiteralPath 'D:\sem自动化'
 # 终端输入（复制时去掉注释符）：& '.\.venv\Scripts\python.exe' -X utf8 '.\sem.py' materials run --project '通亚' --dry-run
 # 上述为离线预览；生成物料时去掉 --dry-run，按提示完成人工节点。
 from __future__ import annotations
@@ -29,6 +29,8 @@ from sem_automation.materials.context.website import (
     write_explicit_website_urls,
 )
 from sem_automation.materials.keywords.wordstat import export as export_wordstat_queries
+from sem_automation.materials.keywords.tables import choose_file, REVIEW_NAMES, FINAL_NAMES, prepare_review, load_final, verify_final_review
+from sem_automation.materials.keywords.wordstat_flow import query as query_wordstat, organize as organize_wordstat
 
 
 VALID_STATUSES = {
@@ -65,6 +67,10 @@ class PipelineRunner:
         output_func: Callable[[str], None] = print,
         dry_run: bool = False,
         website_urls: list[str] | None = None,
+        wordstat_mode: str = 'api',
+        regions=None,
+        review_file=None,
+        keywords_file=None,
     ) -> None:
         self.project_name = safe_name((project_name or "").strip())
         if not self.project_name:
@@ -77,6 +83,10 @@ class PipelineRunner:
         self.input = input_func
         self.print = output_func
         self.dry_run = dry_run
+        self.wordstat_mode = wordstat_mode
+        self.regions = regions
+        self.review_file = review_file
+        self.keywords_file = keywords_file
         self.website_urls = (
             normalize_explicit_website_urls(list(website_urls))
             if website_urls
@@ -86,6 +96,9 @@ class PipelineRunner:
         self.website_branch_finished = False
         self.website_context_ready = False
         self.state = self._load_state() if not dry_run else self._empty_state()
+        obsolete = ('wordstat_export','wordstat_manual','wordstat_clean') if wordstat_mode == 'api' else ('wordstat_query','wordstat_organize')
+        for name in obsolete:
+            self.state['steps'].pop(name, None)
 
     def _empty_state(self) -> dict:
         return {
@@ -420,7 +433,7 @@ class PipelineRunner:
                 outputs=[self.output_dir / "negative_keywords.md"],
                 runner=lambda: generate_negative_keywords(
                     self.project_name,
-                    keyword_version=self._find_keyword_v2().name,
+                    keyword_version=str(self._find_keyword_v2()),
                     project_root=self.project_root,
                 ),
             ),
@@ -436,18 +449,71 @@ class PipelineRunner:
                     self.output_dir / "ad_copy_results.xlsx",
                     self.output_dir / "ad_copy_raw.md",
                 ],
-                runner=lambda: generate_ad_copy(self.project_name, project_root=self.project_root),
+                runner=lambda: generate_ad_copy(self.project_name, project_root=self.project_root, keyword_file=self._find_keyword_v2()),
             ),
         }
 
     def _find_keyword_v2(self) -> Path | None:
-        for name in ("keyword_v2.xlsx", "keywords_v2.xlsx"):
-            path = self.output_dir / name
-            if self._valid_file(path):
-                return path
-        return None
+        return choose_file(self.output_dir, FINAL_NAMES, self.keywords_file)
+
+    def _api_keyword_flow(self):
+        reviewed = choose_file(self.output_dir, REVIEW_NAMES, self.review_file)
+        if reviewed is None:
+            # Existing narrative drafts remain usable: explain conversion rather than guess.
+            try:
+                prepare_review(self.output_dir, root=self.project_root)
+            except ValueError as exc:
+                self.print(str(exc))
+            self._checkpoint('keyword_review', '中俄关键词审核',
+                             [self.output_dir/n for n in REVIEW_NAMES],
+                             '审核 keywords_v1.xlsx 后另存审核版；仅查询 keywords 列。')
+            return False
+        self._update_status('keyword_review', 'completed', f'使用审核文件：{reviewed}')
+        common = dict(root=self.project_root, review_file=reviewed, regions=self.regions)
+        query_step = PipelineStep('wordstat_query', 'Wordstat 自动查询与续跑', [reviewed], [],
+                                  lambda: query_wordstat(self.project_name, report=self.print, **common), always_run=True)
+        if not self._run_step(query_step):
+            return False
+        result_files = [self.output_dir/'wordstat_results.xlsx',self.output_dir/'wordstat_results.csv']
+        # Always verify fingerprints before preserving old output.
+        def organize():
+            try:
+                organize_wordstat(self.project_name, **common)
+            except ValueError as exc:
+                if '已有 Wordstat 结果' not in str(exc):
+                    raise
+                self.print(str(exc))
+                if self._ask_choice('输入 2 覆盖机器结果；3 停止并先备份人工修改 [默认3]：', {'2','3'}, '3') != '2':
+                    raise RuntimeError('已停止整理；保留现有文件')
+                organize_wordstat(self.project_name, overwrite=True, **common)
+        if not self._run_step(PipelineStep('wordstat_organize','AI 筛选、分组与翻译',[],result_files,organize,always_run=True)):
+            return False
+        final = self._find_keyword_v2()
+        if final is None:
+            self._checkpoint('keyword_v2_review','最终词表审核',[self.output_dir/n for n in FINAL_NAMES],
+                             '审核 wordstat_results.xlsx，另存 keywords_v2.xlsx 或 .csv，再用同一命令继续。')
+            return False
+        load_final(self.output_dir, final)
+        try:
+            verify_final_review(self.output_dir, final)
+        except ValueError as exc:
+            self._update_status('keyword_v2_review','waiting_for_human',str(exc))
+            self.print(str(exc))
+            return False
+        self._update_status('keyword_v2_review','completed',f'使用最终词表：{final}')
+        return True
 
     def _preview(self) -> dict:
+        if self.wordstat_mode == 'api':
+            self.print('dry-run：不联网、不写文件。资料 → 初稿/Excel → 人工种子审核 → 全量 Wordstat 查询/续跑 → AI 整理(最多600词) → 人工最终审核 → 否词/广告语/附加信息。')
+            self.print('默认全部地区/设备；项目 wordstat.json 可配置地区，命令 --wordstat-region 覆盖。')
+            missing = []
+            if choose_file(self.output_dir, REVIEW_NAMES, self.review_file) is None:
+                missing.append('keywords_v1_reviewed.xlsx / .csv')
+            if self._find_keyword_v2() is None:
+                missing.append('keywords_v2.xlsx / .csv')
+            self.print('待人工准备：' + '；'.join(missing))
+            return {'project':self.project_name,'dry_run':True,'missing':missing}
         self.print(f"\nSEM Pipeline 预览：{self.project_name}")
         self.print("dry-run 不调用 API、不执行网页请求、不写入任何文件。\n")
         rows = [
@@ -512,6 +578,17 @@ class PipelineRunner:
             return self._finish()
         if not self._run_step(steps["keyword_v1"]):
             self._offer_independent_branch()
+            return self._finish()
+
+        if self.wordstat_mode == 'api':
+            if not self._api_keyword_flow():
+                self._offer_independent_branch()
+                return self._finish()
+            for name in ('negative_keywords','ad_copy'):
+                if not self._run_step(steps[name]):
+                    self._offer_independent_branch()
+                    return self._finish()
+            self._run_website_branch()
             return self._finish()
 
         reviewed_path = self._checkpoint(
@@ -603,6 +680,7 @@ def run_pipeline(
     input_func: Callable[[str], str] = input,
     output_func: Callable[[str], None] = print,
     website_urls: list[str] | None = None,
+    wordstat_mode='api', regions=None, review_file=None, keywords_file=None,
 ) -> dict:
     runner = PipelineRunner(
         project_name,
@@ -610,5 +688,6 @@ def run_pipeline(
         input_func=input_func,
         output_func=output_func,
         website_urls=website_urls,
+        wordstat_mode=wordstat_mode, regions=regions, review_file=review_file, keywords_file=keywords_file,
     )
     return runner.run()

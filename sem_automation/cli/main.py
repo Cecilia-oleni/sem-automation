@@ -1,5 +1,5 @@
 # 模块：sem_automation/cli/main.py；内部模块由统一入口调用。
-# VS Code PowerShell 先输入：Set-Location -LiteralPath 'D:\sem自动化 - 副本'
+# VS Code PowerShell 先输入：Set-Location -LiteralPath 'D:\sem自动化'
 # 终端输入（复制时去掉注释符）：& '.\.venv\Scripts\python.exe' -X utf8 '.\sem.py' --help
 """Single command dispatcher; help and material dry-run have no side effects."""
 import argparse
@@ -12,6 +12,14 @@ def parser():
     materials = families.add_parser('materials', help='生成物料，保留人工审核节点').add_subparsers(dest='action', required=True)
     from sem_automation.cli.materials import build_parser
     materials.add_parser('run', parents=[build_parser()], add_help=False)
+    w = materials.add_parser('wordstat', help='独立准备审核表、查询或整理；支持断点续跑')
+    w.add_argument('operation', choices=['prepare','query','organize'])
+    w.add_argument('--project', required=True)
+    w.add_argument('--review-file', type=Path)
+    w.add_argument('--wordstat-region', action='append')
+    w.add_argument('--dry-run', action='store_true')
+    w.add_argument('--refresh', action='store_true', help='query：新建查询批次，重新请求最新数据')
+    w.add_argument('--overwrite', action='store_true', help='prepare/organize：明确覆盖机器生成的表格')
     reports = families.add_parser('reports', help='生成通用、安琪或宇通月报').add_subparsers(dest='kind', required=True)
     s = reports.add_parser('standard', help='通用 Direct + Metrika 报告')
     s.add_argument('--client', required=True, type=Path)
@@ -36,9 +44,27 @@ def main(argv=None):
     p=parser(); args=p.parse_args(argv)
     try:
         if args.family == 'materials':
+            if args.action == 'wordstat':
+                from sem_automation.materials.keywords.wordstat_flow import query, organize
+                from sem_automation.materials.keywords.tables import prepare_review
+                from sem_automation.core.paths import material_dir
+                if args.refresh and args.operation != 'query':
+                    raise ValueError('--refresh 仅用于 query')
+                if args.operation == 'query':
+                    result = query(args.project, review_file=args.review_file, regions=args.wordstat_region, dry_run=args.dry_run, refresh=args.refresh)
+                elif args.dry_run:
+                    result = {'dry_run': True, 'operation':args.operation, 'project':args.project}
+                elif args.operation == 'prepare':
+                    result = prepare_review(material_dir('outputs', args.project), force=args.overwrite)
+                else:
+                    result = organize(args.project, review_file=args.review_file, regions=args.wordstat_region, overwrite=args.overwrite)
+                print(f'完成：{result}')
+                return 0
             from sem_automation.materials.pipeline import run_pipeline
             project = args.project or input('请输入项目名称：').strip()
-            result=run_pipeline(project, dry_run=args.dry_run, website_urls=args.website)
+            result=run_pipeline(project, dry_run=args.dry_run, website_urls=args.website,
+                                wordstat_mode=args.wordstat_mode, regions=args.wordstat_region,
+                                review_file=args.review_file, keywords_file=args.keywords_file)
             return 1 if result.get('failed') else 0
         if args.kind == 'angel-yeast':
             from sem_automation.reporting.angel_yeast.pipeline import run_report
