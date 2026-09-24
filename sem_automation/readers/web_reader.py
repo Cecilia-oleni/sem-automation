@@ -489,7 +489,15 @@ def crawl_website(
 
             visited_final_urls.add(final_url)
 
-            if not response.encoding:
+            # requests defaults charset-less text/html to Latin-1; honor HTML charset.
+            if not re.search(r"charset\s*=", content_type, re.I):
+                declared = requests.utils.get_encodings_from_content(
+                    response.content[:16384].decode("ascii", errors="ignore")
+                )
+                response.encoding = (
+                    declared[0] if declared else response.apparent_encoding or "utf-8"
+                )
+            elif not response.encoding:
                 response.encoding = (
                     response.apparent_encoding or "utf-8"
                 )

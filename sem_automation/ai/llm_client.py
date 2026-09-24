@@ -151,6 +151,13 @@ def call_openrouter(
         "stream": False
     }
 
+    reasoning_budget = os.getenv("OPENROUTER_REASONING_MAX_TOKENS", "").strip()
+    if reasoning_budget:
+        reasoning_budget = int(reasoning_budget)
+        if not 0 < reasoning_budget < max_tokens:
+            raise ValueError("OPENROUTER_REASONING_MAX_TOKENS 必须大于0且小于 max_tokens")
+        payload["reasoning"] = {"max_tokens": reasoning_budget}
+
     print("正在调用 AI...")
     print("provider: openrouter")
     print("model:", model)

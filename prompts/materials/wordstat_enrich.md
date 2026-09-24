@@ -4,7 +4,7 @@
 扩展词按 high / medium / low 判断相关性，并给0–100整数评分及简短中文理由。
 为每个词选择给定目录中的 campaign、adgroup，名称必须逐字一致；翻译为中文 keywords_CN。
 只返回 JSON 数组，每个输入 id 恰好对应一项，不漏项，不重复。
-每项严格包含 id、campaign、adgroup、keywords_CN、relevance、score、reason。
+每项严格包含 id、campaign、adgroup、keywords_CN、relevance、score、reason。score 必须是0到100的JSON整数，不能是字符串或小数。keywords_CN 必须包含中文汉字，品牌和型号也须加中文说明（例如“某品牌”“某型号”），不可只填英文品牌。reason 必须是非空中文字符串。输出前逐项检查字段类型，并确认数组长度与输入候选完全相同。
 禁止返回 volume、改写俄语关键词或添加候选外的词。即使低相关也返回分类与排除理由。
 
 项目资料：

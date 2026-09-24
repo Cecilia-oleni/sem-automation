@@ -172,6 +172,27 @@ class WordstatTests(unittest.TestCase):
         self.assertEqual(len(calls),5) # taxonomy, batch0, failed20, retry20, batch40
         self.assertEqual(len(writer.call_args.args[2]),31)
 
+    def test_reviewed_translation_and_excluded_opaque_name(self):
+        self.review(1)
+        client = Mock()
+        client.top_requests.return_value = {'totalCount': '1', 'associations': [{'phrase': 'opaque123', 'count': '2'}]}
+        query('test', root=self.root, client=client, report=lambda _: None)
+        (self.out/'project_brief.md').write_text('工业水泵', encoding='utf-8')
+        def ai(prompt):
+            if '只返回 JSON 数组，每项只有' in prompt:
+                return [dict(campaign='工业', adgroup='水泵')]
+            batch = json.loads(prompt.split('候选：\n')[1])
+            return [dict(id=r['id'], campaign='工业', adgroup='水泵', keywords_CN=r['keywords'], relevance='high' if r['seed'] else 'low', score=80 if r['seed'] else 0, reason='业务相关' if r['seed'] else '无关用户名') for r in batch]
+        writer = Mock()
+        organize('test', root=self.root, ai=ai, writer=writer)
+        delivered = writer.call_args.args[2]
+        self.assertEqual(len(delivered), 1)
+        self.assertRegex(delivered[0]['keywords_CN'], r'[\u3400-\u9fff]')
+        audit_path = next((self.out/'_internal').rglob('audit.json'))
+        audit = json.loads(audit_path.read_text('utf-8'))
+        self.assertEqual(audit['candidates']['opaque123']['selection'], 'low_relevance')
+        self.assertEqual(audit['candidates']['opaque123']['keywords_CN'], '已排除词：opaque123')
+
     def initial_pipeline_files(self):
         (self.root/'uploads/materials/test').mkdir(parents=True,exist_ok=True)
         for name in ('raw_text_local.txt','file_report.csv','project_brief.md','keyword_v1.md'):

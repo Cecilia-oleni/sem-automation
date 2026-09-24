@@ -219,3 +219,34 @@ class WebsiteWorkflowModeTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class WebsiteEncodingTests(unittest.TestCase):
+    def test_html_charset_overrides_requests_latin1_default(self):
+        import requests
+        from sem_automation.readers.web_reader import crawl_website
+        response = requests.Response()
+        response.status_code = 200
+        response.url = 'https://example.com/'
+        response.headers['Content-Type'] = 'text/html'
+        response.encoding = 'ISO-8859-1'
+        response._content = '<meta charset="utf-8"><title>Покрытия</title><p>Оборудование</p>'.encode('utf-8')
+        with patch('sem_automation.readers.web_reader.requests.Session') as session:
+            session.return_value.get.return_value = response
+            pages, _, _ = crawl_website([response.url], max_pages=1, delay=0)
+        self.assertEqual(pages[0]['title'], 'Покрытия')
+        self.assertIn('Оборудование', pages[0]['text'])
+
+    def test_explicit_http_charset_is_preserved(self):
+        import requests
+        from sem_automation.readers.web_reader import crawl_website
+        response = requests.Response()
+        response.status_code = 200
+        response.url = 'https://example.com/'
+        response.headers['Content-Type'] = 'text/html; charset=windows-1251'
+        response.encoding = 'windows-1251'
+        response._content = '<title>Покрытия</title>'.encode('windows-1251')
+        with patch('sem_automation.readers.web_reader.requests.Session') as session:
+            session.return_value.get.return_value = response
+            pages, _, _ = crawl_website([response.url], max_pages=1, delay=0)
+        self.assertEqual(pages[0]['title'], 'Покрытия')

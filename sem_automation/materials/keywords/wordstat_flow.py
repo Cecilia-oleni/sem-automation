@@ -217,6 +217,17 @@ def organize(project, *, root=PROJECT_ROOT, review_file=None, regions=None, ai=N
                     result = json.loads(path.read_text('utf-8'))
                 else:
                     result = ai(prompt.replace('{{brief}}',brief).replace('{{groups}}',json.dumps(taxonomy,ensure_ascii=False)).replace('{{candidates}}',json.dumps(batch,ensure_ascii=False)))
+                # Preserve reviewed seed translations before validating model fields.
+                # Excluded opaque names need an honest label, not an invented translation.
+                if isinstance(result, list):
+                    for item in result:
+                        if not isinstance(item, dict) or item.get('id') not in batch_keys:
+                            continue
+                        source = candidates[item['id']]
+                        if source['seed'] and source['keywords_CN']:
+                            item['keywords_CN'] = source['keywords_CN']
+                        elif item.get('relevance') == 'low' and isinstance(item.get('keywords_CN'), str) and not re.search(r'[\u3400-\u9fff]', item['keywords_CN']):
+                            item['keywords_CN'] = '已排除词：' + source['keywords']
                 validate_enrichment(result, batch_keys, groups)
                 save_json(path, result)
                 for item in result:
@@ -260,4 +271,4 @@ def validate_enrichment(rows, expected, groups):
         if (row['campaign'],row['adgroup']) not in groups or row['relevance'] not in ('high','medium','low'):
             raise ValueError('AI 分组或相关性不符合约定')
         if type(row['score']) is not int or not 0 <= row['score'] <= 100 or not isinstance(row['keywords_CN'],str) or not re.search(r'[\u3400-\u9fff]',row['keywords_CN']) or not isinstance(row['reason'],str):
-            raise ValueError('AI 评分、翻译或理由缺失')
+            raise ValueError(f'AI 评分、翻译或理由缺失：{row!r}')
